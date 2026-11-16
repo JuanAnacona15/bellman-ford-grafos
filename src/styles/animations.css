@@ -1,0 +1,218 @@
+/* animations.css — Keyframes and transition definitions */
+
+/* ══════════════════════════════════
+   KEYFRAMES
+══════════════════════════════════ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounceIn {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.05); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-24px) scale(1.04); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Table flash animations */
+@keyframes rowFlash {
+  0%   { background: rgba(88, 166, 255, 0.35); }
+  100% { background: transparent; }
+}
+
+@keyframes rowFlashGreen {
+  0%   { background: rgba(63, 185, 80, 0.4); }
+  100% { background: rgba(63, 185, 80, 0.07); }
+}
+
+@keyframes rowFlashRed {
+  0%   { background: rgba(248, 81, 73, 0.35); }
+  100% { background: transparent; }
+}
+
+/* ══════════════════════════════════
+   LANDING PAGE BG ORBS
+══════════════════════════════════ */
+.hero-bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-bg-orb-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--color-primary);
+  top: 5%;
+  left: 10%;
+  animation: orbFloat 10s ease-in-out infinite;
+}
+
+.hero-bg-orb-2 {
+  width: 350px;
+  height: 350px;
+  background: var(--color-success);
+  bottom: 15%;
+  right: 15%;
+  animation: orbFloat 13s ease-in-out infinite;
+  animation-delay: -5s;
+}
+
+.hero-bg-orb-3 {
+  width: 250px;
+  height: 250px;
+  background: var(--color-danger);
+  top: 60%;
+  left: 8%;
+  animation: orbFloat 9s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+/* ══════════════════════════════════
+   ENTRANCE UTILITY CLASSES
+══════════════════════════════════ */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease forwards;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 0.3s ease forwards;
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.3s ease forwards;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.5s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease forwards;
+}
+
+/* Stagger delays */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+
+/* ══════════════════════════════════
+   TABLE ROW HIGHLIGHTS
+══════════════════════════════════ */
+.row-flash {
+  animation: rowFlash 0.7s ease forwards;
+}
+
+.row-flash-green {
+  animation: rowFlashGreen 0.7s ease forwards;
+}
+
+.row-flash-red {
+  animation: rowFlashRed 0.7s ease forwards;
+}
+
+/* ══════════════════════════════════
+   SPINNER
+══════════════════════════════════ */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+}
+
+.spinner-lg {
+  width: 28px;
+  height: 28px;
+  border-width: 3px;
+}
+
+/* ══════════════════════════════════
+   STEP INFO BAR VARIANTS
+══════════════════════════════════ */
+#step-info-bar.step-info-bar-success {
+  border-top-color: var(--color-success);
+}
+
+#step-info-bar.step-info-bar-warn {
+  border-top-color: var(--color-warning);
+}
+
+#step-info-bar.step-info-bar-error {
+  border-top-color: var(--color-danger);
+}
+
+/* ══════════════════════════════════
+   REDUCED MOTION
+══════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

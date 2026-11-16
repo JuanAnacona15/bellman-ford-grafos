@@ -1,0 +1,193 @@
+/* graph.css — Cytoscape container and floating overlay elements */
+
+#graph-canvas-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════
+   FLOATING TOOLBAR
+══════════════════════════════════ */
+#graph-toolbar {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 0.35rem 0.65rem;
+  z-index: 200;
+  box-shadow: var(--shadow-md);
+  flex-wrap: wrap;
+  max-width: calc(100% - 2rem);
+  backdrop-filter: blur(8px);
+}
+
+.tool-separator {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border);
+  margin: 0 0.1rem;
+  flex-shrink: 0;
+}
+
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.6rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tool-btn:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.tool-btn.active {
+  background: var(--color-primary);
+  color: #000;
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tool-btn.danger:hover {
+  background: var(--color-danger);
+  color: white;
+  border-color: var(--color-danger);
+}
+
+.tool-btn.danger.active {
+  background: var(--color-danger);
+  color: white;
+  border-color: var(--color-danger);
+}
+
+/* ══════════════════════════════════
+   CANVAS HINT
+══════════════════════════════════ */
+#canvas-hint {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(13, 17, 23, 0.88);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  z-index: 150;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+
+/* ══════════════════════════════════
+   ZOOM CONTROLS
+══════════════════════════════════ */
+#zoom-controls {
+  position: absolute;
+  bottom: 56px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 200;
+}
+
+#zoom-controls .btn-icon {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  box-shadow: var(--shadow-sm);
+}
+
+#zoom-controls .btn-icon:hover {
+  color: var(--color-text);
+  border-color: var(--color-primary);
+}
+
+/* ══════════════════════════════════
+   EDGE WEIGHT POPUP
+══════════════════════════════════ */
+#edge-weight-popup {
+  position: absolute;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.4rem 0.5rem;
+  display: none;
+  z-index: 400;
+  box-shadow: var(--shadow-md);
+  align-items: center;
+  gap: 0.3rem;
+}
+
+#edge-weight-popup.visible {
+  display: flex;
+}
+
+#edge-weight-input {
+  width: 72px;
+  padding: 0.3rem 0.4rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+}
+
+#edge-weight-input:focus {
+  border-color: var(--color-primary);
+}
+
+/* ══════════════════════════════════
+   EMPTY GRAPH OVERLAY
+══════════════════════════════════ */
+#graph-empty-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--color-text-subtle);
+  pointer-events: none;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#graph-empty-hint .empty-icon {
+  font-size: 2.5rem;
+  opacity: 0.4;
+}
+
+#graph-empty-hint .empty-text {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+#graph-empty-hint .empty-hint {
+  font-size: 0.75rem;
+  opacity: 0.4;
+}

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bellman-Ford Visualizer — Herramienta interactiva para visualizar el algoritmo de Bellman-Ford, caminos mínimos y detección de ciclos negativos en grafos ponderados dirigidos." />
+  <meta name="keywords" content="Bellman-Ford, algoritmo, grafos, caminos mínimos, visualizador, educativo" />
+  <title>Bellman-Ford Visualizer</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/src/styles/global.css" />
+  <link rel="stylesheet" href="/src/styles/layout.css" />
+  <link rel="stylesheet" href="/src/styles/components.css" />
+  <link rel="stylesheet" href="/src/styles/graph.css" />
+  <link rel="stylesheet" href="/src/styles/animations.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ══════════════════════════════════════════
+         LANDING PAGE
+    ═══════════════════════════════════════════ -->
+    <section id="landing-page">
+      <!-- Animated background orbs -->
+      <div class="hero-bg-orb hero-bg-orb-1"></div>
+      <div class="hero-bg-orb hero-bg-orb-2"></div>
+      <div class="hero-bg-orb hero-bg-orb-3"></div>
+
+      <div class="hero-content animate-fade-in">
+        <div class="logo-badge">
+          <span class="logo-icon">⬡</span>
+          <span class="logo-text">BF Visualizer</span>
+        </div>
+        <h1 class="hero-title">Bellman-Ford<br/>Visualizer</h1>
+        <p class="hero-subtitle">
+          Construye grafos ponderados dirigidos, ejecuta el algoritmo de Bellman-Ford
+          paso a paso y comprende cómo se calculan los caminos mínimos —
+          incluso con pesos negativos.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" id="btn-start">
+            Comenzar →
+          </button>
+          <button class="btn btn-secondary btn-lg" id="btn-view-examples">
+            Ver ejemplos
+          </button>
+        </div>
+      </div>
+
+      <!-- Algorithm info cards -->
+      <div class="info-cards animate-fade-in" style="animation-delay: 0.2s">
+        <div class="info-card">
+          <div class="info-card-icon">🔗</div>
+          <h3 class="info-card-title">Relajación de aristas</h3>
+          <p class="info-card-desc">
+            Visualiza cada relajación: cómo se actualiza la distancia de un vértice cuando se encuentra un camino más corto.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-icon">⚠️</div>
+          <h3 class="info-card-title">Ciclos negativos</h3>
+          <p class="info-card-desc">
+            Detecta ciclos negativos alcanzables desde el origen. El visualizador los identifica e indica los vértices afectados.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-icon">🎯</div>
+          <h3 class="info-card-title">Paso a paso</h3>
+          <p class="info-card-desc">
+            Controla la velocidad de ejecución. Avanza, retrocede y pausa la simulación cuando quieras.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="info-card-icon">📊</div>
+          <h3 class="info-card-title">Resultados detallados</h3>
+          <p class="info-card-desc">
+            Tablas de distancias, iteraciones, caminos mínimos reconstruidos y estadísticas de ejecución.
+          </p>
+        </div>
+      </div>
+
+      <p class="landing-hint">O(V·E) · Detecta ciclos negativos · Pesos arbitrarios</p>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         MAIN APP
+    ═══════════════════════════════════════════ -->
+    <div id="main-app" class="hidden">
+
+      <!-- Header -->
+      <header id="app-header">
+        <div class="logo" id="btn-home">
+          <span class="logo-icon-sm">⬡</span>
+          <span>BF Visualizer</span>
+        </div>
+
+        <nav class="nav-tabs" role="tablist">
+          <button class="nav-tab active" id="tab-constructor" data-tab="constructor" role="tab" aria-selected="true">
+            Constructor
+          </button>
+          <button class="nav-tab" id="tab-simulator" data-tab="simulator" role="tab" aria-selected="false">
+            Simulador
+          </button>
+          <button class="nav-tab" id="tab-results" data-tab="results" role="tab" aria-selected="false">
+            Resultados
+          </button>
+          <button class="nav-tab" id="tab-analysis" data-tab="analysis" role="tab" aria-selected="false">
+            Análisis
+          </button>
+        </nav>
+
+        <div class="header-actions">
+          <button class="btn btn-ghost btn-icon" id="btn-fit-graph" title="Ajustar vista">
+            ⊞
+          </button>
+          <button class="btn btn-ghost btn-icon" id="btn-layout" title="Auto-distribuir">
+            ⟳
+          </button>
+        </div>
+      </header>
+
+      <!-- Main workspace -->
+      <main id="app-main">
+
+        <!-- ── SIDEBAR ── -->
+        <aside id="sidebar">
+
+          <!-- CONSTRUCTOR TAB CONTENT -->
+          <div class="tab-content active" id="content-constructor">
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Vértices</div>
+              <div class="sidebar-content">
+                <div class="form-row">
+                  <input type="text" id="new-vertex-id" class="form-input" placeholder="Nombre del vértice" maxlength="10" />
+                  <button class="btn btn-primary" id="btn-add-vertex">+</button>
+                </div>
+                <div class="vertex-list" id="vertex-list"></div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Aristas</div>
+              <div class="sidebar-content">
+                <div class="form-row">
+                  <select id="edge-from" class="form-input">
+                    <option value="">Desde</option>
+                  </select>
+                  <select id="edge-to" class="form-input">
+                    <option value="">Hacia</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <input type="number" id="edge-weight" class="form-input" placeholder="Peso" value="1" step="0.5" />
+                  <button class="btn btn-primary" id="btn-add-edge">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Origen</div>
+              <div class="sidebar-content">
+                <select id="source-select" class="form-input">
+                  <option value="">Seleccionar origen...</option>
+                </select>
+                <div id="source-badge"></div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Acciones</div>
+              <div class="sidebar-content">
+                <div class="btn-group">
+                  <button class="btn btn-secondary" id="btn-clear-graph">Limpiar grafo</button>
+                  <button class="btn btn-secondary" id="btn-import">Importar</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Ejemplos</div>
+              <div class="sidebar-content" id="examples-list">
+                <!-- Injected by JS -->
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Representación</div>
+              <div class="sidebar-content">
+                <div class="btn-group-tabs">
+                  <button class="repr-tab active" data-repr="visual">Visual</button>
+                  <button class="repr-tab" data-repr="list">Lista</button>
+                  <button class="repr-tab" data-repr="matrix">Matriz</button>
+                </div>
+                <div id="repr-container"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- SIMULATOR TAB CONTENT -->
+          <div class="tab-content hidden" id="content-simulator">
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Origen de simulación</div>
+              <div class="sidebar-content">
+                <select id="sim-source-select" class="form-input">
+                  <option value="">Seleccionar origen...</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Controles</div>
+              <div class="sidebar-content">
+                <div id="sim-controls">
+                  <button class="btn btn-primary" id="btn-prepare" title="Preparar simulación">
+                    ▶ Preparar
+                  </button>
+                  <button class="btn btn-secondary" id="btn-play-pause" disabled title="Play / Pause">
+                    ▶
+                  </button>
+                  <button class="btn btn-ghost btn-icon" id="btn-prev-step" disabled title="Paso anterior">
+                    ◀
+                  </button>
+                  <button class="btn btn-ghost btn-icon" id="btn-next-step" disabled title="Paso siguiente">
+                    ▶
+                  </button>
+                  <button class="btn btn-ghost btn-icon" id="btn-fast-forward" disabled title="Ir al final">
+                    ⏭
+                  </button>
+                  <button class="btn btn-ghost btn-icon" id="btn-restart" disabled title="Reiniciar">
+                    ↺
+                  </button>
+                </div>
+                <div class="speed-control">
+                  <span class="speed-label">Velocidad:</span>
+                  <input type="range" id="speed-slider" min="100" max="2000" step="100" value="600" class="speed-range" />
+                  <span class="speed-label" id="speed-value">600ms</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Progreso</div>
+              <div class="sidebar-content">
+                <div class="progress-info">
+                  <div class="progress-bar-container">
+                    <div class="progress-bar" id="sim-progress-bar" style="width: 0%"></div>
+                  </div>
+                  <div class="progress-text" id="sim-progress-text">Paso 0 / 0</div>
+                </div>
+                <div class="iter-info" id="sim-iter-info"></div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Paso actual</div>
+              <div class="sidebar-content" id="step-detail-panel">
+                <div class="step-placeholder">Inicia la simulación para ver los detalles de cada paso.</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RESULTS TAB CONTENT -->
+          <div class="tab-content hidden" id="content-results">
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Estado</div>
+              <div id="results-status" class="sidebar-content">
+                <div class="step-placeholder">Ejecuta el algoritmo para ver los resultados.</div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Distancias mínimas</div>
+              <div class="sidebar-content" id="results-distances">
+                <div class="step-placeholder">—</div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Estadísticas</div>
+              <div class="sidebar-content" id="results-stats">
+                <div class="step-placeholder">—</div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Exportar</div>
+              <div class="sidebar-content">
+                <div class="btn-group">
+                  <button class="btn btn-secondary" id="btn-export-json" disabled>JSON</button>
+                  <button class="btn btn-secondary" id="btn-export-csv" disabled>CSV</button>
+                  <button class="btn btn-secondary" id="btn-export-history" disabled>Historial</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ANALYSIS TAB CONTENT -->
+          <div class="tab-content hidden" id="content-analysis">
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Ciclos negativos</div>
+              <div class="sidebar-content" id="analysis-neg-cycles">
+                <div class="step-placeholder">Ejecuta el algoritmo para ver el análisis.</div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Tabla de iteraciones</div>
+              <div class="sidebar-content" id="analysis-iterations">
+                <div class="step-placeholder">—</div>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Complejidad</div>
+              <div class="sidebar-content">
+                <div class="complexity-box">
+                  <div class="complexity-row">
+                    <span class="complexity-label">Tiempo:</span>
+                    <code class="complexity-value">O(V · E)</code>
+                  </div>
+                  <div class="complexity-row">
+                    <span class="complexity-label">Espacio:</span>
+                    <code class="complexity-value">O(V)</code>
+                  </div>
+                  <div class="complexity-row">
+                    <span class="complexity-label">Iteraciones:</span>
+                    <code class="complexity-value">|V| − 1</code>
+                  </div>
+                </div>
+                <p class="complexity-note">
+                  Bellman-Ford garantiza el camino mínimo tras <strong>|V| − 1</strong> relajaciones.
+                  Cada arista se examina en cada iteración.
+                </p>
+              </div>
+            </div>
+
+            <div class="sidebar-section">
+              <div class="sidebar-title">Camino mínimo</div>
+              <div class="sidebar-content">
+                <select id="path-target-select" class="form-input">
+                  <option value="">Seleccionar destino...</option>
+                </select>
+                <div id="path-display-container"></div>
+              </div>
+            </div>
+
+          </div>
+
+        </aside>
+
+        <!-- ── GRAPH CANVAS ── -->
+        <section id="graph-canvas-container">
+
+          <!-- Floating toolbar -->
+          <div id="graph-toolbar">
+            <button class="tool-btn active" id="tool-pan" title="Mover (P)">
+              ✥ Mover
+            </button>
+            <button class="tool-btn" id="tool-add-node" title="Agregar vértice (N)">
+              ⊕ Vértice
+            </button>
+            <button class="tool-btn" id="tool-add-edge" title="Agregar arista (E)">
+              → Arista
+            </button>
+            <button class="tool-btn" id="tool-select-source" title="Seleccionar origen (S)">
+              ◎ Origen
+            </button>
+            <div class="tool-separator"></div>
+            <button class="tool-btn danger" id="tool-delete" title="Eliminar (Del)">
+              ✕ Eliminar
+            </button>
+          </div>
+
+          <!-- Cytoscape mount -->
+          <div id="cy"></div>
+
+          <!-- Canvas hint -->
+          <div id="canvas-hint">Haz clic en el lienzo para agregar un vértice</div>
+
+          <!-- Zoom controls -->
+          <div id="zoom-controls">
+            <button class="btn btn-ghost btn-icon" id="btn-zoom-in" title="Acercar">+</button>
+            <button class="btn btn-ghost btn-icon" id="btn-zoom-out" title="Alejar">−</button>
+            <button class="btn btn-ghost btn-icon" id="btn-zoom-fit" title="Ajustar">⊞</button>
+          </div>
+
+          <!-- Edge weight popup -->
+          <div id="edge-weight-popup">
+            <input type="number" id="edge-weight-input" step="0.5" />
+            <button class="btn btn-primary btn-sm" id="btn-confirm-edge-weight">✓</button>
+            <button class="btn btn-ghost btn-icon btn-sm" id="btn-cancel-edge-weight">✕</button>
+          </div>
+
+        </section>
+
+      </main>
+
+      <!-- Step info bar (bottom) -->
+      <div id="step-info-bar" class="hidden">
+        <span class="step-info-icon">⚡</span>
+        <span id="step-info-text">—</span>
+      </div>
+
+    </div><!-- /#main-app -->
+
+  </div><!-- /#app -->
+
+  <!-- Import file input (hidden) -->
+  <input type="file" id="file-import-input" accept=".json,.csv" class="hidden" />
+
+  <!-- Main JS -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
