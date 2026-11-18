@@ -380,20 +380,40 @@
             <button class="tool-btn danger" id="tool-delete" title="Eliminar (Del)">
               ✕ Eliminar
             </button>
+            <div class="tool-separator"></div>
+            <button class="tool-btn" id="btn-toggle-3d" title="Cambiar a vista 3D">
+              🗈 3D
+            </button>
           </div>
 
-          <!-- Layout dropdown -->
+          <!-- Layout dropdown (applies to both 2D and 3D) -->
           <div id="layout-dropdown" class="hidden">
-            <button class="layout-option" data-layout="cose"><span class="layout-icon">⟳</span> Auto (CoSE)</button>
-            <button class="layout-option" data-layout="circle"><span class="layout-icon">◯</span> Círculo</button>
-            <button class="layout-option" data-layout="grid"><span class="layout-icon">⊞</span> Cuadrícula</button>
-            <button class="layout-option" data-layout="breadthfirst"><span class="layout-icon">🌲</span> Árbol BFS</button>
-            <button class="layout-option" data-layout="concentric"><span class="layout-icon">◎</span> Concéntrico</button>
-            <button class="layout-option" data-layout="random"><span class="layout-icon">✦</span> Aleatorio</button>
+            <div class="layout-option" style="font-size:0.7rem;color:var(--color-text-muted);padding:0.3rem 0.9rem;cursor:default" id="layout-label-2d">— 2D —</div>
+            <button class="layout-option" data-layout="cose" data-mode="2d"><span class="layout-icon">⟳</span> Auto (CoSE)</button>
+            <button class="layout-option" data-layout="circle" data-mode="2d"><span class="layout-icon">◯</span> Círculo</button>
+            <button class="layout-option" data-layout="grid" data-mode="2d"><span class="layout-icon">⊞</span> Cuadrícula</button>
+            <button class="layout-option" data-layout="breadthfirst" data-mode="2d"><span class="layout-icon">🌲</span> Árbol BFS</button>
+            <button class="layout-option" data-layout="concentric" data-mode="2d"><span class="layout-icon">◎</span> Concéntrico</button>
+            <button class="layout-option" data-layout="random" data-mode="2d"><span class="layout-icon">✦</span> Aleatorio</button>
+            <div class="layout-option" style="font-size:0.7rem;color:var(--color-text-muted);padding:0.3rem 0.9rem;cursor:default" id="layout-label-3d">— 3D —</div>
+            <button class="layout-option" data-layout="force" data-mode="3d"><span class="layout-icon">⚡</span> Fuerza 3D</button>
+            <button class="layout-option" data-layout="breadthfirst" data-mode="3d"><span class="layout-icon">🌐</span> Esfera</button>
+            <button class="layout-option" data-layout="concentric" data-mode="3d"><span class="layout-icon">🌀</span> Hélice</button>
+            <button class="layout-option" data-layout="circle" data-mode="3d"><span class="layout-icon">◯</span> Círculo XY</button>
+            <button class="layout-option" data-layout="grid" data-mode="3d"><span class="layout-icon">⊞</span> Cuadrícula 3D</button>
+            <button class="layout-option" data-layout="random" data-mode="3d"><span class="layout-icon">✦</span> Aleatorio 3D</button>
           </div>
 
-          <!-- Cytoscape mount -->
+          <!-- Cytoscape 2D mount -->
           <div id="cy"></div>
+
+          <!-- 3D mount (hidden by default) -->
+          <div id="cy-3d" class="hidden" style="width:100%;height:100%;position:absolute;top:0;left:0;"></div>
+
+          <!-- 3D orbit hint -->
+          <div id="hint-3d" class="hidden">
+            🖱️ Arrastra · 🔁 Orbitar · 💎 Zoom · Clic en nodo para herramienta activa
+          </div>
 
           <!-- Canvas hint -->
           <div id="canvas-hint">Haz clic en el lienzo para agregar un vértice</div>

@@ -5,8 +5,10 @@
 
 import { Graph } from './core/Graph.js';
 import { GraphRenderer } from './visualization/GraphRenderer.js';
+import { GraphRenderer3D } from './visualization/GraphRenderer3D.js';
 import { GraphInteractions, TOOL_MODES } from './visualization/GraphInteractions.js';
 import { GraphAnimations } from './visualization/GraphAnimations.js';
+import { GraphAnimations3D } from './visualization/GraphAnimations3D.js';
 import { SimulationController, SIM_STATE } from './simulator/SimulationController.js';
 import { EXAMPLE_GRAPHS, loadExample } from './examples/ExampleGraphs.js';
 import { validateWeight } from './core/GraphValidation.js';
@@ -24,11 +26,14 @@ const state = {
   graph: new Graph(),
   source: null,
   renderer: null,
+  renderer3d: null,
   interactions: null,
   animations: null,
+  animations3d: null,
   sim: null,
   currentTab: 'constructor',
   editingEdgeId: null,
+  mode3d: false,
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -132,6 +137,80 @@ function init() {
 
   // Update simulation buttons
   onSimStateChange(SIM_STATE.IDLE, null);
+
+  // Wire 3D toggle
+  $('btn-toggle-3d').addEventListener('click', () => toggle3DMode(!state.mode3d));
+}
+
+// ═══════════════════════════════════════════════════════════
+// 3D MODE TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggle3DMode(enable) {
+  state.mode3d = enable;
+  const btn = $('btn-toggle-3d');
+  const cy2d = $('cy');
+  const cy3d = $('cy-3d');
+
+  if (enable) {
+    // Lazy-init the 3D renderer
+    if (!state.renderer3d) {
+      cy3d.classList.remove('hidden');
+      state.renderer3d = new GraphRenderer3D('cy-3d', {
+        onNodeTap: handleNodeTap,
+        onEdgeTap: handleEdgeTap,
+        onBgTap: handleBgTap,
+      });
+      state.animations3d = new GraphAnimations3D(state.renderer3d);
+    }
+
+    // Sync graph data
+    state.renderer3d.syncGraph(state.graph);
+    if (state.source) state.renderer3d.setSource(state.source, null);
+
+    // Switch visibility
+    cy2d.style.display = 'none';
+    cy3d.classList.remove('hidden');
+    cy3d.style.display = 'block';
+    state.renderer3d.resize();
+
+    // Re-wire simulation to 3D animations
+    state.sim.animations = state.animations3d;
+
+    btn.classList.add('active');
+    btn.innerHTML = '🗈 2D';
+    btn.title = 'Cambiar a vista 2D';
+
+    // Hide canvas hint and zoom controls in 3D (orbit controls replace them)
+    $('canvas-hint').style.display = 'none';
+    $('zoom-controls').style.display = 'none';
+    $('hint-3d').classList.remove('hidden');
+
+    setTimeout(() => state.renderer3d.fit(), 300);
+    toast('Vista 3D activada. Arrastra para orbitar, rueda para zoom.', 'success');
+  } else {
+    // Switch back to 2D
+    cy2d.style.display = 'block';
+    cy3d.style.display = 'none';
+
+    // Re-wire simulation to 2D animations
+    state.sim.animations = state.animations;
+
+    btn.classList.remove('active');
+    btn.innerHTML = '🗈 3D';
+    btn.title = 'Cambiar a vista 3D';
+
+    $('canvas-hint').style.display = '';
+    $('zoom-controls').style.display = '';
+    $('hint-3d').classList.add('hidden');
+
+    state.renderer.fit();
+    toast('Vista 2D restaurada.', 'success');
+  }
+}
+
+/** Get the currently active renderer. */
+function activeRenderer() {
+  return state.mode3d ? state.renderer3d : state.renderer;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -197,6 +276,12 @@ function onGraphChange() {
   renderRepr();
   persistGraph();
 
+  // Keep 3D renderer in sync if it exists
+  if (state.renderer3d) {
+    state.renderer3d.syncGraph(state.graph);
+    if (state.source) state.renderer3d.setSource(state.source, null);
+  }
+
   // If sim is finished/running, reset it on graph change
   if (state.sim.state !== SIM_STATE.IDLE) {
     state.sim.reset();
@@ -215,6 +300,8 @@ function setSource(nodeId) {
   const prev = state.source;
   state.source = nodeId;
   state.renderer.setSource(nodeId, prev);
+  // Also sync 3D renderer if it exists
+  if (state.renderer3d) state.renderer3d.setSource(nodeId, prev);
   renderSourceBadge();
   persistGraph();
 
@@ -444,8 +531,10 @@ function wireEvents() {
     toast('Grafo limpiado.');
   });
 
-  // Fit button
-  $('btn-fit-graph').addEventListener('click', () => state.renderer.fit());
+  // Fit button — works for both 2D and 3D
+  $('btn-fit-graph').addEventListener('click', () => {
+    state.mode3d ? state.renderer3d?.fit() : state.renderer.fit();
+  });
 
   // Layout dropdown toggle
   const layoutToggleBtn = $('btn-layout-toggle');
@@ -457,7 +546,16 @@ function wireEvents() {
   document.querySelectorAll('.layout-option').forEach(opt => {
     opt.addEventListener('click', () => {
       const layout = opt.dataset.layout;
-      state.renderer.layout(layout);
+      const mode   = opt.dataset.mode; // '2d', '3d', or undefined
+      if (mode === '3d') {
+        // Switch to 3D mode if not already, then apply layout
+        if (!state.mode3d) toggle3DMode(true);
+        state.renderer3d?.layout(layout);
+      } else {
+        // mode === '2d' or legacy (no data-mode)
+        if (state.mode3d) toggle3DMode(false);
+        state.renderer.layout(layout);
+      }
       layoutDropdown.classList.add('hidden');
       toast(`Layout "${opt.textContent.trim()}" aplicado.`);
     });
@@ -469,14 +567,16 @@ function wireEvents() {
     }
   });
 
-  // Zoom controls
+  // Zoom controls (only for 2D — 3D uses scroll wheel natively)
   $('btn-zoom-in').addEventListener('click', () => {
-    state.renderer.cy.zoom(state.renderer.cy.zoom() * 1.2);
+    if (!state.mode3d) state.renderer.cy.zoom(state.renderer.cy.zoom() * 1.2);
   });
   $('btn-zoom-out').addEventListener('click', () => {
-    state.renderer.cy.zoom(state.renderer.cy.zoom() / 1.2);
+    if (!state.mode3d) state.renderer.cy.zoom(state.renderer.cy.zoom() / 1.2);
   });
-  $('btn-zoom-fit').addEventListener('click', () => state.renderer.fit());
+  $('btn-zoom-fit').addEventListener('click', () => {
+    state.mode3d ? state.renderer3d?.fit() : state.renderer.fit();
+  });
 
   // Toolbar tool buttons
   $('tool-pan').addEventListener('click', () => setTool(TOOL_MODES.PAN));

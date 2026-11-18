@@ -239,3 +239,44 @@
   width: 18px;
   text-align: center;
 }
+
+/* ══════════════════════════════════
+   3D VIEW
+══════════════════════════════════ */
+#cy-3d {
+  position: absolute;
+  inset: 0;
+  /* 3d-force-graph inserts a canvas and a WebGL renderer inside here */
+}
+
+#cy-3d canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 3D toggle button active glow */
+#btn-toggle-3d.active {
+  background: rgba(88, 166, 255, 0.18);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.35);
+}
+
+/* Orbit hint banner that appears in 3D mode */
+#hint-3d {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(13, 17, 23, 0.85);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.3rem 0.9rem;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  z-index: 250;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+}
