@@ -1,35 +1,34 @@
 /**
- * GraphStyles.js — Cytoscape.js style definitions for all node/edge states
- * Uses vivid neon-accented colors for simulation steps.
+ * GraphStyles.js — Cytoscape.js style definitions — Neon Futuristic Theme
  */
 
 export const STATES = {
-  DEFAULT: 'default',
-  SOURCE: 'source',
-  VISITED: 'visited',
+  DEFAULT:      'default',
+  SOURCE:       'source',
+  VISITED:      'visited',
   CURRENT_EDGE: 'currentEdge',
-  RELAXED: 'relaxed',
-  NO_CHANGE: 'noChange',
-  MIN_PATH: 'minPath',
-  NEG_CYCLE: 'negCycle',
-  UNREACHABLE: 'unreachable',
-  AFFECTED: 'affected',
+  RELAXED:      'relaxed',
+  NO_CHANGE:    'noChange',
+  MIN_PATH:     'minPath',
+  NEG_CYCLE:    'negCycle',
+  UNREACHABLE:  'unreachable',
+  AFFECTED:     'affected',
 };
 
 export const COLORS = {
-  nodeBg: '#0d1117',
-  nodeDefault: '#58a6ff',
-  nodeSource: '#ff6b6b',
-  nodeVisited: '#00ff88',
-  nodeNegCycle: '#ff3333',
-  nodeAffected: '#ffcc00',
-  nodeUnreachable: '#4a5568',
-  edgeDefault: 'rgba(88, 166, 255, 0.35)',
-  edgeActive: '#ff9500',
-  edgeRelaxed: '#00ff88',
-  edgeNoChange: '#4a5568',
-  edgePath: '#00cfff',
-  edgeNegCycle: '#ff3333',
+  nodeBg:        '#04070f',
+  nodeDefault:   '#00d4ff',
+  nodeSource:    '#ff6b00',
+  nodeVisited:   '#00ff88',
+  nodeNegCycle:  '#ff0080',
+  nodeAffected:  '#ffe600',
+  nodeUnreachable:'#1e3045',
+  edgeDefault:   'rgba(0,212,255,0.3)',
+  edgeActive:    '#ff6b00',
+  edgeRelaxed:   '#00ff88',
+  edgeNoChange:  'rgba(30,48,69,0.6)',
+  edgePath:      '#00d4ff',
+  edgeNegCycle:  '#ff0080',
 };
 
 export function getCytoscapeStyles() {
@@ -38,35 +37,39 @@ export function getCytoscapeStyles() {
     {
       selector: 'node',
       style: {
-        'background-color': '#0d1117',
-        'border-color': '#3d5a80',
-        'border-width': 2.5,
-        'label': 'data(label)',
-        'text-valign': 'center',
-        'text-halign': 'center',
-        'color': '#e6edf3',
-        'font-size': '13px',
-        'font-family': 'Inter, sans-serif',
-        'font-weight': '700',
-        'width': 44,
-        'height': 44,
+        'background-color':  '#04070f',
+        'border-color':      '#00d4ff',
+        'border-width':      2.5,
+        'label':             'data(label)',
+        'text-valign':       'center',
+        'text-halign':       'center',
+        'color':             '#00d4ff',
+        'font-size':         '13px',
+        'font-family':       'Orbitron, Inter, sans-serif',
+        'font-weight':       '700',
+        'width':             44,
+        'height':            44,
+        'text-outline-color':'#04070f',
+        'text-outline-width': 2,
         'transition-property': 'background-color, border-color, border-width, width, height',
-        'transition-duration': '250ms',
+        'transition-duration': '220ms',
         'transition-timing-function': 'ease-out',
       },
     },
 
-    // ── SOURCE ── Bright coral with thick glow border
+    // ── SOURCE ── Blazing orange
     {
       selector: 'node.source',
       style: {
-        'border-color': '#ff6b6b',
-        'border-width': 4,
-        'background-color': 'rgba(255, 107, 107, 0.22)',
-        'color': '#fff',
-        'font-weight': '800',
-        'width': 50,
-        'height': 50,
+        'border-color':      '#ff6b00',
+        'border-width':      4,
+        'background-color':  'rgba(255,107,0,0.2)',
+        'color':             '#ff6b00',
+        'font-weight':       '900',
+        'width':  52,
+        'height': 52,
+        'text-outline-color': '#04070f',
+        'text-outline-width': 2.5,
       },
     },
 
@@ -74,58 +77,68 @@ export function getCytoscapeStyles() {
     {
       selector: 'node.visited',
       style: {
-        'border-color': '#00ff88',
-        'border-width': 3,
-        'background-color': 'rgba(0, 255, 136, 0.15)',
-        'color': '#00ff88',
+        'border-color':     '#00ff88',
+        'border-width':     3,
+        'background-color': 'rgba(0,255,136,0.12)',
+        'color':            '#00ff88',
+        'text-outline-color': '#04070f',
+        'text-outline-width': 2,
       },
     },
 
-    // ── NEGATIVE CYCLE ── Bright red with pulse
+    // ── NEGATIVE CYCLE ── Hot pink / magenta
     {
       selector: 'node.neg-cycle',
       style: {
-        'border-color': '#ff3333',
-        'border-width': 4.5,
-        'background-color': 'rgba(255, 51, 51, 0.25)',
-        'color': '#ff3333',
-        'font-weight': '800',
-        'width': 50,
-        'height': 50,
+        'border-color':     '#ff0080',
+        'border-width':     4.5,
+        'background-color': 'rgba(255,0,128,0.22)',
+        'color':            '#ff0080',
+        'font-weight':      '900',
+        'width':  52,
+        'height': 52,
+        'text-outline-color': '#04070f',
+        'text-outline-width': 2.5,
       },
     },
 
-    // ── AFFECTED by neg cycle ── Vivid amber
+    // ── AFFECTED ── Electric yellow
     {
       selector: 'node.affected',
       style: {
-        'border-color': '#ffcc00',
-        'border-width': 3.5,
-        'background-color': 'rgba(255, 204, 0, 0.18)',
-        'color': '#ffcc00',
+        'border-color':     '#ffe600',
+        'border-width':     3.5,
+        'background-color': 'rgba(255,230,0,0.14)',
+        'color':            '#ffe600',
+        'text-outline-color': '#04070f',
+        'text-outline-width': 2,
       },
     },
 
-    // ── UNREACHABLE ── Muted
+    // ── UNREACHABLE ── Deep muted blue
     {
       selector: 'node.unreachable',
       style: {
-        'border-color': '#4a5568',
-        'background-color': 'rgba(74, 85, 104, 0.1)',
-        'color': '#4a5568',
-        'opacity': 0.55,
+        'border-color':     '#1e3045',
+        'background-color': 'rgba(30,48,69,0.3)',
+        'color':            '#2a4a66',
+        'opacity':          0.5,
       },
     },
 
-    // ── PATH NODE ── Cyan highlight
+    // ── PATH NODE ── Bright cyan (same as default but bigger + glowing)
     {
       selector: 'node.path-node',
       style: {
-        'border-color': '#00cfff',
-        'border-width': 4,
-        'background-color': 'rgba(0, 207, 255, 0.2)',
-        'color': '#00cfff',
-        'font-weight': '800',
+        'border-color':     '#00d4ff',
+        'border-width':     5,
+        'background-color': 'rgba(0,212,255,0.18)',
+        'color':            '#00d4ff',
+        'font-weight':      '900',
+        'width':  50,
+        'height': 50,
+        'text-outline-color': '#04070f',
+        'text-outline-width': 2.5,
       },
     },
 
@@ -133,18 +146,19 @@ export function getCytoscapeStyles() {
     {
       selector: 'node:selected',
       style: {
-        'border-width': 4,
-        'border-color': '#fff',
+        'border-width': 4.5,
+        'border-color': '#ffffff',
+        'background-color': 'rgba(255,255,255,0.08)',
       },
     },
 
-    // ── DIST LABEL variant (shown during simulation) ──
+    // ── DIST LABEL ──
     {
       selector: 'node[distLabel]',
       style: {
-        'content': (ele) => `${ele.data('label')}\n${ele.data('distLabel')}`,
-        'text-wrap': 'wrap',
-        'font-size': '11px',
+        'content':    (ele) => `${ele.data('label')}\n${ele.data('distLabel')}`,
+        'text-wrap':  'wrap',
+        'font-size':  '11px',
         'line-height': '1.5',
       },
     },
@@ -157,39 +171,40 @@ export function getCytoscapeStyles() {
     {
       selector: 'edge',
       style: {
-        'width': 2,
-        'line-color': 'rgba(88, 166, 255, 0.35)',
-        'target-arrow-color': 'rgba(88, 166, 255, 0.35)',
-        'target-arrow-shape': 'triangle',
-        'arrow-scale': 1.3,
-        'curve-style': 'bezier',
-        'label': 'data(label)',
-        'font-size': '11px',
-        'font-family': 'Inter, sans-serif',
-        'font-weight': '700',
-        'color': '#c9d1d9',
-        'text-background-color': '#161b22',
+        'width':                2,
+        'line-color':           'rgba(0,212,255,0.28)',
+        'target-arrow-color':   'rgba(0,212,255,0.28)',
+        'target-arrow-shape':   'triangle',
+        'arrow-scale':          1.3,
+        'curve-style':          'bezier',
+        'label':                'data(label)',
+        'font-size':            '11px',
+        'font-family':          'JetBrains Mono, monospace',
+        'font-weight':          '700',
+        'color':                'rgba(0,212,255,0.7)',
+        'text-background-color':   '#04070f',
         'text-background-opacity': 1,
         'text-background-padding': '2px',
-        'text-background-shape': 'roundrectangle',
-        'text-margin-y': -9,
-        'transition-property': 'line-color, target-arrow-color, width, opacity',
-        'transition-duration': '200ms',
+        'text-background-shape':   'roundrectangle',
+        'text-margin-y':        -9,
+        'transition-property':  'line-color, target-arrow-color, width, opacity',
+        'transition-duration':  '200ms',
         'transition-timing-function': 'ease-out',
       },
     },
 
-    // ── ACTIVE EDGE being evaluated — blazing orange ──
+    // ── ACTIVE EDGE — blazing orange ──
     {
       selector: 'edge.active-edge',
       style: {
-        'line-color': '#ff9500',
-        'target-arrow-color': '#ff9500',
-        'width': 4.5,
-        'color': '#ff9500',
+        'line-color':         '#ff6b00',
+        'target-arrow-color': '#ff6b00',
+        'width':     5,
+        'color':     '#ff6b00',
         'font-weight': '800',
         'font-size': '12px',
-        'z-index': 999,
+        'z-index':   999,
+        'text-background-color': '#04070f',
       },
     },
 
@@ -197,22 +212,24 @@ export function getCytoscapeStyles() {
     {
       selector: 'edge.relaxed-edge',
       style: {
-        'line-color': '#00ff88',
+        'line-color':         '#00ff88',
         'target-arrow-color': '#00ff88',
-        'width': 4,
-        'color': '#00ff88',
+        'width':     4.5,
+        'color':     '#00ff88',
         'font-weight': '800',
-        'z-index': 998,
+        'z-index':   998,
+        'text-background-color': '#04070f',
       },
     },
 
-    // ── NO-CHANGE EDGE — dim gray ──
+    // ── NO-CHANGE EDGE — very dim ──
     {
       selector: 'edge.no-change-edge',
       style: {
-        'line-color': '#3d4452',
-        'target-arrow-color': '#3d4452',
-        'width': 1.5,
+        'line-color':         'rgba(0,212,255,0.08)',
+        'target-arrow-color': 'rgba(0,212,255,0.08)',
+        'width':   1.5,
+        'color':   'rgba(0,212,255,0.25)',
         'opacity': 0.5,
       },
     },
@@ -221,25 +238,27 @@ export function getCytoscapeStyles() {
     {
       selector: 'edge.path-edge',
       style: {
-        'line-color': '#00cfff',
-        'target-arrow-color': '#00cfff',
-        'width': 4,
-        'color': '#00cfff',
+        'line-color':         '#00d4ff',
+        'target-arrow-color': '#00d4ff',
+        'width':     5,
+        'color':     '#00d4ff',
         'font-weight': '800',
-        'z-index': 997,
+        'z-index':   997,
+        'text-background-color': '#04070f',
       },
     },
 
-    // ── NEG CYCLE EDGE — bright red ──
+    // ── NEG CYCLE EDGE — hot pink ──
     {
       selector: 'edge.neg-cycle-edge',
       style: {
-        'line-color': '#ff3333',
-        'target-arrow-color': '#ff3333',
-        'width': 4.5,
-        'color': '#ff3333',
+        'line-color':         '#ff0080',
+        'target-arrow-color': '#ff0080',
+        'width':     5,
+        'color':     '#ff0080',
         'font-weight': '800',
-        'z-index': 999,
+        'z-index':   999,
+        'text-background-color': '#04070f',
       },
     },
 
@@ -247,9 +266,9 @@ export function getCytoscapeStyles() {
     {
       selector: 'edge.parallel',
       style: {
-        'curve-style': 'unbundled-bezier',
-        'control-point-distances': [50],
-        'control-point-weights': [0.5],
+        'curve-style':              'unbundled-bezier',
+        'control-point-distances':  [50],
+        'control-point-weights':    [0.5],
       },
     },
 
@@ -257,9 +276,9 @@ export function getCytoscapeStyles() {
     {
       selector: 'edge[source = target]',
       style: {
-        'curve-style': 'loop',
+        'curve-style':    'loop',
         'loop-direction': '0deg',
-        'loop-sweep': '45deg',
+        'loop-sweep':     '45deg',
       },
     },
   ];

@@ -18,6 +18,11 @@ import {
   exportHistoryCSV, downloadFile,
 } from './utils/Export.js';
 import { importGraphJSON, importGraphCSV, readFileAsText } from './utils/Import.js';
+import {
+  animateLandingEntrance, animateAppEntrance,
+  animateTabSwitch, animateToastIn, animateToastOut,
+  animateStepFlash, animateButtonPress, startOrbIdle,
+} from './animations.js';
 
 // ═══════════════════════════════════════════════════════════
 // STATE
@@ -59,28 +64,26 @@ function notify(msg, type = 'info') {
   show(bar);
 }
 
+// Toast container (created once)
+let _toastContainer = null;
+function getToastContainer() {
+  if (!_toastContainer) {
+    _toastContainer = document.createElement('div');
+    _toastContainer.id = 'toast-container';
+    document.body.appendChild(_toastContainer);
+  }
+  return _toastContainer;
+}
+
 function toast(msg, type = 'success') {
+  const icons = { success: '✦', error: '✕', warning: '⚠', info: 'ℹ' };
   const el = document.createElement('div');
   el.className = `toast toast-${type}`;
-  el.textContent = msg;
-  document.body.appendChild(el);
-  el.style.cssText = `
-    position: fixed; bottom: 60px; right: 16px; z-index: 9999;
-    background: ${type === 'error' ? 'var(--color-danger)' : type === 'success' ? 'var(--color-success)' : 'var(--color-surface-2)'};
-    color: ${type === 'error' || type === 'success' ? '#000' : 'var(--color-text)'};
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    box-shadow: var(--shadow-md);
-    animation: fadeIn 0.3s ease;
-    max-width: 320px;
-  `;
+  el.innerHTML = `<span class="toast-icon">${icons[type] ?? '✦'}</span><span>${msg}</span>`;
+  getToastContainer().appendChild(el);
+  animateToastIn(el);
   setTimeout(() => {
-    el.style.opacity = '0';
-    el.style.transition = 'opacity 0.3s';
-    setTimeout(() => el.remove(), 300);
+    animateToastOut(el, () => el.remove());
   }, 2800);
 }
 
@@ -217,21 +220,24 @@ function activeRenderer() {
 // LANDING PAGE
 // ═══════════════════════════════════════════════════════════
 $('btn-start').addEventListener('click', () => {
+  animateButtonPress($('btn-start'));
   hide($('landing-page'));
   show($('main-app'));
   $('main-app').style.display = 'flex';
-  setTimeout(() => state.renderer.fit(), 100);
+  animateAppEntrance();
+  setTimeout(() => state.renderer.fit(), 400);
 });
 
 $('btn-view-examples').addEventListener('click', () => {
+  animateButtonPress($('btn-view-examples'));
   hide($('landing-page'));
   show($('main-app'));
   $('main-app').style.display = 'flex';
+  animateAppEntrance();
   switchTab('constructor');
-  // Scroll to examples section
   setTimeout(() => {
     $('examples-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 200);
+  }, 400);
 });
 
 $('btn-home').addEventListener('click', () => {
@@ -253,6 +259,9 @@ function switchTab(tabName) {
     content.classList.add('hidden');
   });
   $(`content-${tabName}`)?.classList.remove('hidden');
+  // Animate the incoming tab panel
+  const incomingPanel = $(`content-${tabName}`);
+  if (incomingPanel) animateTabSwitch(incomingPanel);
 
   // Sync source selects
   if (tabName === 'simulator') {
@@ -1303,5 +1312,11 @@ function wireSidebarResizer() {
 // ═══════════════════════════════════════════════════════════
 // BOOTSTRAP
 // ═══════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  // Fire landing page entrance animation
+  animateLandingEntrance();
+  // Start idle orb drift
+  startOrbIdle();
+});
 
