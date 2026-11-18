@@ -115,12 +115,8 @@
         </nav>
 
         <div class="header-actions">
-          <button class="btn btn-ghost btn-icon" id="btn-fit-graph" title="Ajustar vista">
-            ⊞
-          </button>
-          <button class="btn btn-ghost btn-icon" id="btn-layout" title="Auto-distribuir">
-            ⟳
-          </button>
+          <button class="btn btn-ghost btn-icon" id="btn-fit-graph" title="Ajustar vista (F)">⊞</button>
+          <button class="btn btn-ghost" id="btn-layout-toggle" title="Organizar grafo">⟳ Layout</button>
         </div>
       </header>
 
@@ -129,6 +125,8 @@
 
         <!-- ── SIDEBAR ── -->
         <aside id="sidebar">
+          <!-- Resize handle -->
+          <div id="sidebar-resizer" title="Arrastrar para redimensionar"></div>
 
           <!-- CONSTRUCTOR TAB CONTENT -->
           <div class="tab-content active" id="content-constructor">
@@ -138,8 +136,9 @@
               <div class="sidebar-content">
                 <div class="form-row">
                   <input type="text" id="new-vertex-id" class="form-input" placeholder="Nombre del vértice" maxlength="10" />
-                  <button class="btn btn-primary" id="btn-add-vertex">+</button>
+                  <button class="btn btn-primary" id="btn-add-vertex" title="Agregar uno">+</button>
                 </div>
+                <button class="btn btn-secondary" id="btn-add-batch" style="width:100%">⊕⊕ Agregar varios vértices…</button>
                 <div class="vertex-list" id="vertex-list"></div>
               </div>
             </div>
@@ -383,6 +382,16 @@
             </button>
           </div>
 
+          <!-- Layout dropdown -->
+          <div id="layout-dropdown" class="hidden">
+            <button class="layout-option" data-layout="cose"><span class="layout-icon">⟳</span> Auto (CoSE)</button>
+            <button class="layout-option" data-layout="circle"><span class="layout-icon">◯</span> Círculo</button>
+            <button class="layout-option" data-layout="grid"><span class="layout-icon">⊞</span> Cuadrícula</button>
+            <button class="layout-option" data-layout="breadthfirst"><span class="layout-icon">🌲</span> Árbol BFS</button>
+            <button class="layout-option" data-layout="concentric"><span class="layout-icon">◎</span> Concéntrico</button>
+            <button class="layout-option" data-layout="random"><span class="layout-icon">✦</span> Aleatorio</button>
+          </div>
+
           <!-- Cytoscape mount -->
           <div id="cy"></div>
 
@@ -419,6 +428,102 @@
 
   <!-- Import file input (hidden) -->
   <input type="file" id="file-import-input" accept=".json,.csv" class="hidden" />
+
+  <!-- ═══ BATCH VERTICES MODAL ═══ -->
+  <div id="batch-modal-overlay" class="hidden" style="
+    position:fixed;inset:0;background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(6px);display:flex;align-items:center;
+    justify-content:center;z-index:3000;
+  ">
+    <div style="
+      background:var(--color-surface);border:1px solid var(--color-border);
+      border-radius:var(--radius-xl);padding:1.5rem;width:360px;
+      max-width:95vw;box-shadow:var(--shadow-lg);
+      animation:scaleIn 0.2s ease;
+    ">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <span style="font-weight:700;font-size:1rem">⊕⊕ Agregar varios vértices</span>
+        <button class="btn btn-ghost btn-icon" id="batch-modal-close">✕</button>
+      </div>
+
+      <!-- Type selector -->
+      <div style="margin-bottom:0.75rem">
+        <div class="sidebar-title" style="margin-bottom:0.4rem">Tipo de notación</div>
+        <div class="btn-group-tabs" id="batch-type-tabs">
+          <button class="repr-tab active" data-batch="numeric">1 … N</button>
+          <button class="repr-tab" data-batch="alpha">A … Z</button>
+          <button class="repr-tab" data-batch="prefix">V1 … VN</button>
+        </div>
+      </div>
+
+      <!-- Numeric: from / to -->
+      <div id="batch-numeric" class="batch-panel">
+        <div class="form-row" style="margin-bottom:0.5rem">
+          <div class="form-group">
+            <label class="form-label">Desde</label>
+            <input type="number" id="batch-num-from" class="form-input" value="1" min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hasta</label>
+            <input type="number" id="batch-num-to" class="form-input" value="5" min="1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prefijo (opcional)</label>
+          <input type="text" id="batch-num-prefix" class="form-input" placeholder="Ej: V → V1, V2…" maxlength="5" />
+        </div>
+      </div>
+
+      <!-- Alpha: A…Z range -->
+      <div id="batch-alpha" class="batch-panel hidden">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Desde</label>
+            <input type="text" id="batch-alpha-from" class="form-input" value="A" maxlength="1" style="text-transform:uppercase" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hasta</label>
+            <input type="text" id="batch-alpha-to" class="form-input" value="E" maxlength="1" style="text-transform:uppercase" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Prefix: V1 … VN -->
+      <div id="batch-prefix" class="batch-panel hidden">
+        <div class="form-row" style="margin-bottom:0.5rem">
+          <div class="form-group">
+            <label class="form-label">Prefijo</label>
+            <input type="text" id="batch-pfx-name" class="form-input" value="V" maxlength="5" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cantidad N</label>
+            <input type="number" id="batch-pfx-count" class="form-input" value="5" min="1" max="50" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Inicio del índice</label>
+          <input type="number" id="batch-pfx-start" class="form-input" value="1" min="0" />
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div style="margin-top:0.75rem;margin-bottom:0.75rem">
+        <div class="sidebar-title" style="margin-bottom:0.3rem">Vista previa</div>
+        <div id="batch-preview" style="
+          background:var(--color-surface-2);border:1px solid var(--color-border);
+          border-radius:var(--radius-sm);padding:0.5rem 0.6rem;
+          font-size:0.78rem;color:var(--color-text-muted);
+          min-height:28px;font-family:monospace;
+          word-break:break-all;
+        "></div>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end">
+        <button class="btn btn-secondary" id="batch-modal-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="batch-modal-confirm">⊕ Agregar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Main JS -->
   <script type="module" src="/src/main.js"></script>

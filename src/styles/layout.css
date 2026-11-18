@@ -223,6 +223,8 @@
 /* ── Sidebar ── */
 #sidebar {
   width: 280px;
+  min-width: 180px;
+  max-width: 480px;
   flex-shrink: 0;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
@@ -231,6 +233,45 @@
   flex-direction: column;
   position: relative;
   z-index: 50;
+  /* width is controlled via JS resize drag */
+}
+
+/* Resize handle */
+#sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 200;
+  background: transparent;
+  transition: background var(--transition-fast);
+}
+
+#sidebar-resizer::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 40px;
+  border-radius: 2px;
+  background: var(--color-border);
+  opacity: 0;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+
+#sidebar-resizer:hover::after,
+#sidebar-resizer.dragging::after {
+  opacity: 1;
+  background: var(--color-primary);
+}
+
+#sidebar-resizer:hover,
+#sidebar-resizer.dragging {
+  background: rgba(88, 166, 255, 0.06);
 }
 
 .sidebar-section {
@@ -290,7 +331,7 @@
 #step-info-bar {
   position: fixed;
   bottom: 0;
-  left: 280px;
+  left: var(--sidebar-width, 280px);
   right: 0;
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);

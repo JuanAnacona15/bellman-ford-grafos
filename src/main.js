@@ -444,9 +444,30 @@ function wireEvents() {
     toast('Grafo limpiado.');
   });
 
-  // Fit / layout buttons
+  // Fit button
   $('btn-fit-graph').addEventListener('click', () => state.renderer.fit());
-  $('btn-layout').addEventListener('click', () => state.renderer.layout('cose'));
+
+  // Layout dropdown toggle
+  const layoutToggleBtn = $('btn-layout-toggle');
+  const layoutDropdown = $('layout-dropdown');
+  layoutToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    layoutDropdown.classList.toggle('hidden');
+  });
+  document.querySelectorAll('.layout-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const layout = opt.dataset.layout;
+      state.renderer.layout(layout);
+      layoutDropdown.classList.add('hidden');
+      toast(`Layout "${opt.textContent.trim()}" aplicado.`);
+    });
+  });
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!layoutDropdown.contains(e.target) && e.target !== layoutToggleBtn) {
+      layoutDropdown.classList.add('hidden');
+    }
+  });
 
   // Zoom controls
   $('btn-zoom-in').addEventListener('click', () => {
@@ -574,6 +595,12 @@ function wireEvents() {
     toast('Grafo importado correctamente.');
     e.target.value = '';
   });
+
+  // ── Batch vertex modal ──
+  wireBatchModal();
+
+  // ── Sidebar resizer ──
+  wireSidebarResizer();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1004,6 +1031,177 @@ window.highlightNode = (nodeId) => {
 };
 
 // ═══════════════════════════════════════════════════════════
+// BATCH VERTEX MODAL
+// ═══════════════════════════════════════════════════════════
+function wireBatchModal() {
+  const overlay = $('batch-modal-overlay');
+  const closeModal = () => overlay.classList.add('hidden');
+
+  $('btn-add-batch').addEventListener('click', () => {
+    overlay.classList.remove('hidden');
+    updateBatchPreview();
+  });
+  $('batch-modal-close').addEventListener('click', closeModal);
+  $('batch-modal-cancel').addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
+  // Type tabs
+  document.querySelectorAll('#batch-type-tabs .repr-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#batch-type-tabs .repr-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.batch-panel').forEach(p => p.classList.add('hidden'));
+      $(`batch-${btn.dataset.batch}`)?.classList.remove('hidden');
+      updateBatchPreview();
+    });
+  });
+
+  // Live preview on any input change
+  ['batch-num-from','batch-num-to','batch-num-prefix',
+   'batch-alpha-from','batch-alpha-to',
+   'batch-pfx-name','batch-pfx-count','batch-pfx-start'].forEach(id => {
+    $(id)?.addEventListener('input', updateBatchPreview);
+  });
+
+  // Confirm
+  $('batch-modal-confirm').addEventListener('click', () => {
+    const vertices = generateBatchVertices();
+    if (!vertices || vertices.length === 0) {
+      toast('No se generaron vértices. Verifica los valores.', 'error'); return;
+    }
+    if (vertices.length > 50) {
+      toast('Máximo 50 vértices por lote.', 'error'); return;
+    }
+    let added = 0;
+    let skipped = 0;
+    vertices.forEach(id => {
+      if (state.graph.addVertex(id)) {
+        state.renderer.addNode(id);
+        added++;
+      } else {
+        skipped++;
+      }
+    });
+    onGraphChange();
+    state.renderer.layout('cose');
+    closeModal();
+    const msg = skipped > 0
+      ? `${added} vértice(s) agregado(s), ${skipped} omitido(s) (ya existían).`
+      : `${added} vértice(s) agregado(s).`;
+    toast(msg, added > 0 ? 'success' : 'error');
+  });
+}
+
+function getActiveBatchType() {
+  return document.querySelector('#batch-type-tabs .repr-tab.active')?.dataset.batch || 'numeric';
+}
+
+function generateBatchVertices() {
+  const type = getActiveBatchType();
+  const ids = [];
+
+  if (type === 'numeric') {
+    const from = parseInt($('batch-num-from').value, 10);
+    const to   = parseInt($('batch-num-to').value, 10);
+    const pfx  = $('batch-num-prefix').value.trim();
+    if (isNaN(from) || isNaN(to) || from > to) return [];
+    for (let i = from; i <= Math.min(to, from + 49); i++) {
+      ids.push(`${pfx}${i}`);
+    }
+
+  } else if (type === 'alpha') {
+    const fromChar = ($('batch-alpha-from').value.toUpperCase().trim() || 'A')[0];
+    const toChar   = ($('batch-alpha-to').value.toUpperCase().trim()   || 'E')[0];
+    const fromCode = fromChar.charCodeAt(0);
+    const toCode   = toChar.charCodeAt(0);
+    if (fromCode > toCode) return [];
+    for (let c = fromCode; c <= Math.min(toCode, fromCode + 49); c++) {
+      ids.push(String.fromCharCode(c));
+    }
+
+  } else if (type === 'prefix') {
+    const pfx   = $('batch-pfx-name').value.trim() || 'V';
+    const count = Math.min(parseInt($('batch-pfx-count').value, 10) || 5, 50);
+    const start = parseInt($('batch-pfx-start').value, 10) || 1;
+    for (let i = start; i < start + count; i++) {
+      ids.push(`${pfx}${i}`);
+    }
+  }
+  return ids;
+}
+
+function updateBatchPreview() {
+  const preview = $('batch-preview');
+  if (!preview) return;
+  const vertices = generateBatchVertices();
+  if (!vertices || vertices.length === 0) {
+    preview.textContent = '(sin vértices)';
+    return;
+  }
+  const shown = vertices.slice(0, 20).join(', ');
+  const extra = vertices.length > 20 ? ` … (+${vertices.length - 20} más)` : '';
+  preview.textContent = `${shown}${extra}  [total: ${vertices.length}]`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SIDEBAR RESIZER
+// ═══════════════════════════════════════════════════════════
+function wireSidebarResizer() {
+  const sidebar  = $('sidebar');
+  const resizer  = $('sidebar-resizer');
+  const stepBar  = $('step-info-bar');
+  if (!resizer || !sidebar) return;
+
+  let startX = 0;
+  let startW = 0;
+  let dragging = false;
+
+  resizer.addEventListener('mousedown', (e) => {
+    dragging = true;
+    startX = e.clientX;
+    startW = sidebar.getBoundingClientRect().width;
+    resizer.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const delta = e.clientX - startX;
+    const newW = Math.max(180, Math.min(480, startW + delta));
+    sidebar.style.width = `${newW}px`;
+    // Sync CSS variable so step-info-bar stays aligned
+    document.documentElement.style.setProperty('--sidebar-width', `${newW}px`);
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    resizer.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+
+  // Touch support
+  resizer.addEventListener('touchstart', (e) => {
+    dragging = true;
+    startX = e.touches[0].clientX;
+    startW = sidebar.getBoundingClientRect().width;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    const delta = e.touches[0].clientX - startX;
+    const newW = Math.max(180, Math.min(480, startW + delta));
+    sidebar.style.width = `${newW}px`;
+    document.documentElement.style.setProperty('--sidebar-width', `${newW}px`);
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => { dragging = false; });
+}
+
+// ═══════════════════════════════════════════════════════════
 // BOOTSTRAP
 // ═══════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', init);
+
